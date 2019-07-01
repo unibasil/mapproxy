@@ -75,7 +75,10 @@ class TiledSource(MapLayer):
             return self.client.get_tile(tile_coord, format=query.format)
         except HTTPClientError as e:
             if self.error_handler:
-                resp = self.error_handler.handle(e.response_code, query)
+                if e.response_code == 502:
+                    resp = self.error_handler.handle(404, query)
+                else:
+                    resp = self.error_handler.handle(e.response_code, query)                
                 if resp:
                     return resp
             log.warn('could not retrieve tile: %s', e)
